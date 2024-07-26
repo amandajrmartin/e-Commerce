@@ -17,6 +17,7 @@ router.get('/', async (req, res) => {
 
 // get one product
 router.get('/:id', async (req, res) => {
+  console.log("Req Params: ", req.params);  // { id: "address input"}
   try {
     const productData = await Product.findByPk(req.params.id, {
       include: [Category, { model: Tag, through: ProductTag }]
@@ -57,15 +58,21 @@ router.post('/', (req, res) => {
 
 // update product
 router.put('/:id', (req, res) => {
+  console.log("Req Params: ", req.params);
+  console.log("Req Body: ", req.body);
+
   Product.update(req.body, {
     where: {
       id: req.params.id,
     },
   })
     .then((product) => {
+      console.log("Current Product: ", product)
       return ProductTag.findAll({ where: { product_id: req.params.id } });
     })
     .then((productTags) => {
+      console.log("Product Tags: ", productTags);
+
       const productTagIds = productTags.map(({ tag_id }) => tag_id);
       const newProductTags = req.body.tagIds
         .filter((tag_id) => !productTagIds.includes(tag_id))
@@ -86,12 +93,14 @@ router.put('/:id', (req, res) => {
     })
     .then((updatedProductTags) => res.json(updatedProductTags))
     .catch((err) => {
+      console.log("Err: ", err);
       res.status(400).json(err);
     });
 });
 
 // delete product
 router.delete('/:id', async (req, res) => {
+  console.log("Req Params Object: ", req.params);
   try {
     const productData = await Product.destroy({
       where: {
